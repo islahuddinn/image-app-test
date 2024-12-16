@@ -1,3 +1,4 @@
+
 import { PrismaClient } from "@prisma/client";
 import { NextApiRequest, NextApiResponse } from "next";
 
@@ -16,7 +17,7 @@ export default async function handler(
     }
 
     if (req.method === "POST") {
-      const { url } = req.body;
+      const { url } = req.body; 
 
       if (!url) {
         return res.status(400).json({ error: "Photo URL is required" });
