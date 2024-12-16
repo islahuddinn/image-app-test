@@ -19,6 +19,9 @@ type Photo = {
   comments: Comment[];
 };
 
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+
+
 export default function Home() {
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [commentText, setCommentText] = useState("");
@@ -30,38 +33,54 @@ export default function Home() {
   }, []);
 
   const fetchPhotos = async () => {
-    const response = await axios.get<Photo[]>("/api/photos");
-    setPhotos(response.data);
-  };
-
-  async function handleUploadPhoto() {
-  if (!photoFile) {
-    console.error("No file selected");
-    return;
-  }
-
-  try {
-    const imageUrl = await uploadFileToSupabase(photoFile);
-    console.log("Uploaded image to Supabase:", imageUrl);
-        await axios.post("/api/photos", { url: imageUrl });
-        setPhotoFile(null);
-        fetchPhotos();
-     } catch (error) {
-    console.error("Error uploading file:", error);
+    try {
+      const response = await axios.get<Photo[]>(`${BASE_URL}/api/photos`);
+      setPhotos(response.data);
+    } catch (error) {
+      console.error("Error fetching photos:", error);
     }
   };
 
+  async function handleUploadPhoto() {
+    if (!photoFile) {
+      console.error("No file selected");
+      return;
+    }
+
+    try {
+      const imageUrl = await uploadFileToSupabase(photoFile);
+      console.log("Uploaded image to Supabase:", imageUrl);
+
+      await axios.post(`${BASE_URL}/api/photos`, { url: imageUrl });
+      setPhotoFile(null);
+      fetchPhotos();
+    } catch (error) {
+      console.error("Error uploading file:", error);
+    }
+  }
+
   const handleSubmitComment = async (photoId: number) => {
     if (commentText) {
-      await axios.post("/api/comments", { photoId, text: commentText });
-      setCommentText("");
-      fetchPhotos();
+      try {
+        await axios.post(`${BASE_URL}/api/comments`, {
+          photoId,
+          text: commentText,
+        });
+        setCommentText("");
+        fetchPhotos();
+      } catch (error) {
+        console.error("Error submitting comment:", error);
+      }
     }
   };
 
   const handleReset = async () => {
-    await axios.post("/api/reset");
-    setPhotos([]);
+    try {
+      await axios.post(`${BASE_URL}/api/reset`);
+      setPhotos([]);
+    } catch (error) {
+      console.error("Error resetting database:", error);
+    }
   };
 
   return (
