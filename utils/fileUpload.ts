@@ -13,7 +13,7 @@ export const uploadFileToSupabase = async (file: File): Promise<string> => {
   const fileName = `${uuidv4()}-${file.name}`;
 
   const { error } = await supabase.storage
-    .from("photoss") 
+    .from("photoss")
     .upload(fileName, file);
 
   if (error) {
